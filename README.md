@@ -27,6 +27,7 @@
 - [多环境配置](#多环境配置)
 - [接口清单](#接口清单)
 - [Schema 驱动开发](#schema-驱动开发)
+- [搜索过滤（配置驱动）](#搜索过滤配置驱动)
 - [分支模型（GitFlow）](#分支模型gitflow)
 - [提交规范](#提交规范)
 - [常见问题](#常见问题)
@@ -238,6 +239,60 @@ npm run dev
 ```
 
 新增一个字段时，只需在此处补充声明，`app/pages/widgets/` 下的 `schema-form`、`schema-search-bar` 与 `schema-view` 组件会自动渲染出对应的 UI 与交互，无需改动视图层代码。
+
+## 搜索过滤（配置驱动）
+
+搜索栏的过滤规则同样由 `searchOption` 声明，服务端在运行时读取并动态生成过滤条件 —— **新增可筛选字段不需要改动任何 controller 代码**。
+
+实现见 [app/service/query.js](app/service/query.js)：
+
+| 方法 | 职责 |
+| --- | --- |
+| `findSchemaProps(projKey, api)` | 递归遍历菜单树，按 `schemaConfig.api` 定位模块的字段 schema |
+| `applyFilters(list, query, schemaProps)` | **遍历 schema 而非查询参数**，按声明的算子逐字段过滤 |
+| `matches(fieldValue, rawValue, operator)` | 单字段匹配，支持 `eq` / `like` / `in` |
+
+### 算子推导
+
+算子默认由 `comType` 推导，无需额外声明：
+
+| `comType` | 算子 | 行为 |
+| --- | --- | --- |
+| `input` | `like` | 子串模糊匹配 |
+| `select` | `eq` | 精确匹配 |
+| `dynamicSelect` | `eq` | 精确匹配 |
+| `dateRange` | `range` | 按 `字段名_start` / `字段名_end` 做区间匹配 |
+
+当默认推导不符合语义时，用 `filterType` 显式覆盖：
+
+```js
+searchOption: {
+  comType: "input",
+  filterType: "eq", // eq | like | range | in
+}
+```
+
+### 空值约定
+
+查询参数值为 `""` 或未传时视为「不过滤」。因此所有「全部」选项统一写空字符串：
+
+```js
+{ label: "全部", value: "" }
+```
+
+> 不要使用 `"all"`、`-999` 这类魔法值。哨兵值必须在业务代码里逐处判断，正是配置驱动要消除的东西。
+
+### 扩展新字段
+
+在 `model` 配置里加上 `searchOption` 即可，controller 一行都不用动：
+
+```js
+inventory: {
+  type: "number",
+  label: "库存",
+  searchOption: { comType: "input" }, // ← 加上这行，筛选立刻生效
+}
+```
 
 ## 分支模型（GitFlow）
 
