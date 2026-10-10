@@ -59,19 +59,19 @@ module.exports = {
                 enumList: [
                   {
                     label: "全部",
-                    value: -999,
+                    value: "",
                   },
                   {
                     label: "￥39.9",
                     value: 39.9,
                   },
                   {
-                    label: "￥399",
-                    value: 399,
+                    label: "￥199",
+                    value: 199,
                   },
                   {
-                    label: "￥1399",
-                    value: 1399,
+                    label: "￥899",
+                    value: 899,
                   },
                 ],
               },
