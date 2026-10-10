@@ -1,4 +1,7 @@
 module.exports = (app) => {
+  //当前模块的数据源 api，与 router 中注册的路径一致
+  const MODULE_API = "/api/proj/product";
+
   const sleep = async (time) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -56,17 +59,24 @@ module.exports = (app) => {
 
     async getList(ctx) {
       await sleep(500);
-      const { product_name: productName, page, size } = ctx.request.query;
+      const { page, size } = ctx.request.query;
+
       //获取 proj_key
       //根据不同的 proj_key 做不一样的数据提取
-      let productList = this.getProductList(ctx);
-      if (productName && productName !== "all") {
-        productList = productList.filter(
-          (item) => item.product_name === productName,
-        );
-      }
+      const queryService = this.app.service.query;
+      //筛选规则由 model 配置中的 searchOption 声明，此处不再逐字段判断
+      const schemaProps = queryService.findSchemaProps(
+        ctx.projKey,
+        MODULE_API,
+      );
+      const productList = queryService.applyFilters(
+        this.getProductList(ctx),
+        ctx.request.query,
+        schemaProps,
+      );
+
       this.success(ctx, productList, {
-        total: 3,
+        total: productList.length,
         page,
         size,
       });
@@ -75,20 +85,21 @@ module.exports = (app) => {
       // await sleep(500);
       this.success(ctx, [
         {
+          //"全部"统一用空字符串表示，query 服务会将其视为不过滤
           label: `全部`,
-          value: "all",
+          value: "",
         },
         {
-          label: `${ctx.projKey} -《大前端面试宝典》`,
-          value: `${ctx.projKey} -《大前端面试宝典》`,
+          label: `${ctx.projKey}-《大前端面试宝典》`,
+          value: `${ctx.projKey}-《大前端面试宝典》`,
         },
         {
-          label: `${ctx.projKey} -《前端求职之道》`,
-          value: `${ctx.projKey} -《前端求职之道》`,
+          label: `${ctx.projKey}-《前端求职之道》`,
+          value: `${ctx.projKey}-《前端求职之道》`,
         },
         {
-          label: `${ctx.projKey} -《大前端全栈实践》`,
-          value: `${ctx.projKey} -《大前端全栈实践》`,
+          label: `${ctx.projKey}-《大前端全栈实践》`,
+          value: `${ctx.projKey}-《大前端全栈实践》`,
         },
       ]);
     }
