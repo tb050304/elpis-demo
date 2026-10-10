@@ -1,0 +1,21 @@
+{
+  "name": "elpis-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "set _ENV=local&& nodemon ./server.js",
+    "beta": "set _ENV=beta&& node ./server.js",
+    "prod": "set _ENV=production&& node ./server.js",
+    "build:dev": "set _ENV=local&&node --max_old_space_size=4096 ./build.js",
+    "build:prod": "set _ENV=production&&node ./build.js"
+  },
+  "author": "涛波",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.13"
+  },
+  "dependencies": {
+    "@teribom/elpis": "^1.0.0"
+  }
+}

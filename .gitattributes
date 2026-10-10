@@ -1,0 +1,24 @@
+# 统一换行符：仓库内一律以 LF 存储，检出时按平台自动转换
+* text=auto
+
+# 显式声明文本文件类型
+*.js    text
+*.json  text
+*.vue   text
+*.md    text
+*.tpl   text
+*.less  text
+*.css   text
+*.yml   text
+
+# 二进制文件不做任何转换
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+
+# lockfile 不参与 diff 展示，减少评审噪音
+package-lock.json -diff
